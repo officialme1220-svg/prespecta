@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BrandMind AI — Emotionally Intelligent Brand Advisor</title>
+  <meta name="description" content="BrandMind reads the emotional fingerprint of your brand and tells you exactly why people scroll past — and what to say instead. Powered by behavioral psychology and AI." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ── Animated Background Orbs ─────────────────────────────────── -->
+  <div class="bg-canvas" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="orb orb-4"></div>
+  </div>
+
+  <!-- ── Navigation ────────────────────────────────────────────────── -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="#" class="logo" id="navLogo">
+        <span class="logo-brain">🧠</span>
+        <span class="logo-text">BrandMind<span class="logo-ai">AI</span></span>
+      </a>
+      <div class="nav-right">
+        <button class="btn-ghost" id="navHowItWorks">How it works</button>
+        <button class="btn-primary" id="navCTA">Analyze My Brand →</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ══════════════════════════════════════════════════════════════════
+       SECTION 1 — Hero
+  ════════════════════════════════════════════════════════════════════ -->
+  <section id="hero" class="section section-hero">
+    <div class="hero-inner">
+      <div class="hero-badge">
+        <span class="badge-pulse"></span>
+        Grounded in Behavioral Psychology &amp; Jungian Archetypes
+      </div>
+
+      <h1 class="hero-title">
+        Your brand has a story.<br>
+        <span class="gradient-text">The world just hasn't<br>heard it yet.</span>
+      </h1>
+
+      <p class="hero-subtitle">
+        BrandMind reads the <em>emotional fingerprint</em> of your brand — 
+        and tells you exactly why people scroll past, and what to say instead.
+        No generic advice. No fluff. Just the truth.
+      </p>
+
+      <div class="hero-cta-row">
+        <button class="btn-primary btn-hero" id="heroCTA">
+          Analyze My Brand Free
+          <svg class="btn-icon" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        </button>
+        <p class="hero-tagline">No signup. No credit card. Just answers.</p>
+      </div>
+
+      <!-- Floating preview cards -->
+      <div class="hero-cards" aria-hidden="true">
+        <div class="hero-card hero-card-left glass-card">
+          <div class="hc-icon">🔮</div>
+          <div class="hc-body">
+            <div class="hc-label">Emotional Perception</div>
+            <div class="hc-text">"Feels like a half-open door — something's worth entering, but nothing invites you in."</div>
+          </div>
+        </div>
+        <div class="hero-card hero-card-right glass-card">
+          <div class="hc-icon">🧠</div>
+          <div class="hc-body">
+            <div class="hc-label">Psychological Gap</div>
+            <div class="hc-text">Sage archetype language targeting a Rebel audience — identity dissonance.</div>
+          </div>
+        </div>
+        <div class="hero-card hero-card-bottom glass-card">
+          <div class="hc-top">
+            <div class="hc-score-label">Brand Score</div>
+            <div class="hc-score-value">74<span>/100</span></div>
+          </div>
+          <div class="hc-bar-bg"><div class="hc-bar-fill" style="width:74%"></div></div>
+        </div>
+      </div>
+
+      <!-- How It Works -->
+      <div class="how-it-works" id="howItWorks">
+        <h2 class="hiw-title">How it works</h2>
+        <div class="hiw-steps">
+          <div class="hiw-step">
+            <div class="hiw-num">01</div>
+            <div class="hiw-content">
+              <h3>Tell us about your brand</h3>
+              <p>Fill in your brand info, paste your bio &amp; captions, and drop screenshots of your Instagram feed.</p>
+            </div>
+          </div>
+          <div class="hiw-divider"></div>
+          <div class="hiw-step">
+            <div class="hiw-num">02</div>
+            <div class="hiw-content">
+              <h3>BrandMind runs a deep audit</h3>
+              <p>Our AI identifies your brand archetype, emotional tone, and the exact psychological gap causing low engagement.</p>
+            </div>
+          </div>
+          <div class="hiw-divider"></div>
+          <div class="hiw-step">
+            <div class="hiw-num">03</div>
+            <div class="hiw-content">
+              <h3>Get the rewrite that changes everything</h3>
+              <p>Receive a concrete, side-by-side before/after of your actual copy — and keep chatting with your AI advisor.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════════
+       SECTION 2 — Brand Setup Form
+  ════════════════════════════════════════════════════════════════════ -->
+  <section id="setup" class="section section-setup" style="display:none">
+    <div class="section-inner">
+
+      <div class="section-header">
+        <div class="step-progress">
+          <div class="step-dot active" aria-label="Step 1: Brand Info">
+            <span>1</span>
+          </div>
+          <div class="step-track"><div class="step-track-fill" style="width:0%"></div></div>
+          <div class="step-dot" aria-label="Step 2: Analysis">
+            <span>2</span>
+          </div>
+          <div class="step-track"><div class="step-track-fill" style="width:0%"></div></div>
+          <div class="step-dot" aria-label="Step 3: Chat">
+            <span>3</span>
+          </div>
+        </div>
+        <h2 class="section-title">Tell me about your brand</h2>
+        <p class="section-subtitle">Be honest. The more real you are, the more precise the diagnosis.</p>
+      </div>
+
+      <form id="brandForm" novalidate>
+
+        <!-- ── Block 1: The Basics ── -->
+        <div class="form-block">
+          <div class="form-block-header">
+            <span class="form-block-num">01</span>
+            <h3>The Basics</h3>
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="brandName">Brand Name <span class="req">*</span></label>
+              <input type="text" id="brandName" name="name" placeholder="e.g. Studio Mara" required />
+            </div>
+            <div class="form-group">
+              <label for="industry">Industry / Niche <span class="req">*</span></label>
+              <input type="text" id="industry" name="industry" placeholder="e.g. Organic Skincare, SaaS, Fashion" required />
+            </div>
+            <div class="form-group grid-full">
+              <label for="targetAudience">Who is your ideal customer? <span class="req">*</span></label>
+              <input type="text" id="targetAudience" name="targetAudience" placeholder="e.g. Women 25-35 who value sustainability and self-care rituals" required />
+            </div>
+            <div class="form-group">
+              <label for="instagramHandle">Instagram Handle</label>
+              <div class="input-with-prefix">
+                <span class="input-prefix">@</span>
+                <input type="text" id="instagramHandle" name="instagramHandle" placeholder="yourbrand" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Block 2: Instagram Stats ── -->
+        <div class="form-block">
+          <div class="form-block-header">
+            <span class="form-block-num">02</span>
+            <h3>Instagram Numbers <span class="optional-badge">Helpful but optional</span></h3>
+          </div>
+          <div class="form-grid three-col">
+            <div class="form-group">
+              <label for="followers">Followers</label>
+              <input type="text" id="followers" name="followers" placeholder="e.g. 2,400" />
+            </div>
+            <div class="form-group">
+              <label for="avgLikes">Avg. Likes / Post</label>
+              <input type="text" id="avgLikes" name="avgLikes" placeholder="e.g. 48" />
+            </div>
+            <div class="form-group">
+              <label for="avgComments">Avg. Comments / Post</label>
+              <input type="text" id="avgComments" name="avgComments" placeholder="e.g. 3" />
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Block 3: Screenshot Upload ── -->
+        <div class="form-block">
+          <div class="form-block-header">
+            <span class="form-block-num">03</span>
+            <h3>Instagram Screenshots <span class="optional-badge">AI reads visuals too</span></h3>
+          </div>
+          <p class="form-hint">Drop screenshots of your feed, top posts, or bio. BrandMind uses vision AI to read your visual energy — color palette, aesthetic consistency, and overall vibe.</p>
+
+          <div class="drop-zone" id="dropZone" role="button" tabindex="0" aria-label="Upload screenshots">
+            <div class="drop-zone-inner">
+              <div class="drop-icon">📸</div>
+              <p class="drop-main">Drag &amp; drop your Instagram screenshots here</p>
+              <p class="drop-sub">or <label for="fileInput" class="file-link">browse files</label></p>
+              <p class="drop-formats">PNG · JPG · WEBP · Up to 6 images · 10 MB each</p>
+            </div>
+            <input type="file" id="fileInput" accept="image/*" multiple />
+          </div>
+
+          <div class="image-previews" id="imagePreviews" aria-label="Uploaded images"></div>
+        </div>
+
+        <!-- ── Block 4: Your Words ── -->
+        <div class="form-block">
+          <div class="form-block-header">
+            <span class="form-block-num">04</span>
+            <h3>Your Words</h3>
+          </div>
+          <div class="form-group">
+            <label for="bio">Instagram Bio</label>
+            <textarea id="bio" name="bio" rows="3" placeholder="Paste your current Instagram bio exactly as it appears..."></textarea>
+          </div>
+          <div class="form-group">
+            <label for="captions">
+              Sample Captions
+              <span class="label-hint">Paste 1–3 recent captions — the more you share, the sharper the diagnosis</span>
+            </label>
+            <textarea id="captions" name="captions" rows="6" placeholder="Paste your recent post captions here. Include the ones you feel most conflicted about."></textarea>
+          </div>
+        </div>
+
+        <!-- ── Block 5: The Real Stuff ── -->
+        <div class="form-block">
+          <div class="form-block-header">
+            <span class="form-block-num">05</span>
+            <h3>The Real Stuff</h3>
+          </div>
+          <div class="form-group">
+            <label for="brandStory">Describe your brand in your own words</label>
+            <textarea id="brandStory" name="brandStory" rows="4" placeholder="What does your brand stand for? What made you start it? What do you want people to FEEL when they encounter it?"></textarea>
+          </div>
+          <div class="form-group">
+            <label for="challenge">
+              What's your biggest challenge right now?
+              <span class="label-hint">Be brutally specific — vague problems get vague answers</span>
+            </label>
+            <textarea id="challenge" name="challenge" rows="3" placeholder="e.g. 'I get 50-80 likes per post but zero DMs and no one ever buys.' or 'I've been stuck at 800 followers for 6 months and I don't know why.'"></textarea>
+          </div>
+        </div>
+
+        <!-- ── Block 6: Brand Archetype ── -->
+        <div class="form-block">
+          <div class="form-block-header">
+            <span class="form-block-num">06</span>
+            <h3>What energy does your brand have? <span class="optional-badge">Pick the closest</span></h3>
+          </div>
+          <p class="form-hint">Don't overthink this. Pick the one that feels most like your brand's vibe today — even if it's not perfect.</p>
+          <div class="archetype-grid" id="archetypeGrid">
+            <!-- Populated by JS -->
+          </div>
+          <input type="hidden" id="selectedArchetype" name="archetype" value="" />
+        </div>
+
+        <!-- ── Submit ── -->
+        <div class="form-submit-area">
+          <button type="submit" class="btn-primary btn-submit" id="analyzeBtn">
+            <span class="submit-default">
+              Run My Brand Audit
+              <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+            </span>
+            <span class="submit-loading" style="display:none">
+              <span class="spinner"></span>
+              Analyzing...
+            </span>
+          </button>
+          <p class="submit-note">Takes 10–20 seconds. Be honest — it makes the diagnosis sharper.</p>
+        </div>
+
+      </form>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════════
+       SECTION 3 — Analysis Results Dashboard
+  ════════════════════════════════════════════════════════════════════ -->
+  <section id="analysis" class="section section-analysis" style="display:none">
+    <div class="section-inner">
+
+      <div class="analysis-topbar">
+        <div class="analysis-brand-pill" id="analysisBrandPill">
+          <span class="pill-avatar" id="pillAvatar">B</span>
+          <div>
+            <div class="pill-name" id="pillName">Brand Name</div>
+            <div class="pill-sub" id="pillSub">Industry</div>
+          </div>
+        </div>
+        <button class="btn-ghost btn-sm" id="restartBtn">← Start over</button>
+      </div>
+
+      <!-- Score Dashboard ── -->
+      <div class="score-dashboard glass-card">
+
+        <div class="score-main-col">
+          <div class="score-ring-wrap">
+            <svg class="score-ring" viewBox="0 0 120 120" fill="none">
+              <circle class="ring-bg" cx="60" cy="60" r="52" />
+              <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="52"
+                stroke-dasharray="326.7"
+                stroke-dashoffset="326.7"
+                transform="rotate(-90 60 60)" />
+            </svg>
+            <div class="score-center">
+              <div class="score-number" id="scoreNumber">—</div>
+              <div class="score-label-sm">Brand Score</div>
+            </div>
+          </div>
+
+          <div class="archetype-reveal" id="archetypeReveal">
+            <div class="ar-archetype" id="arArchetypeName">—</div>
+            <div class="ar-desc" id="arArchetypeDesc">Detecting archetype...</div>
+          </div>
+
+          <div class="emotional-tone-chip" id="emotionalToneChip">
+            <span class="etone-dot"></span>
+            <span id="emotionalToneText">—</span>
+          </div>
+        </div>
+
+        <div class="score-bars-col">
+          <div class="score-bar-item" id="bar-content">
+            <div class="sbar-label">Content</div>
+            <div class="sbar-track"><div class="sbar-fill purple" data-score="0"></div></div>
+            <div class="sbar-val">0</div>
+          </div>
+          <div class="score-bar-item" id="bar-audience">
+            <div class="sbar-label">Audience Fit</div>
+            <div class="sbar-track"><div class="sbar-fill blue" data-score="0"></div></div>
+            <div class="sbar-val">0</div>
+          </div>
+          <div class="score-bar-item" id="bar-positioning">
+            <div class="sbar-label">Positioning</div>
+            <div class="sbar-track"><div class="sbar-fill teal" data-score="0"></div></div>
+            <div class="sbar-val">0</div>
+          </div>
+          <div class="score-bar-item" id="bar-messaging">
+            <div class="sbar-label">Messaging</div>
+            <div class="sbar-track"><div class="sbar-fill pink" data-score="0"></div></div>
+            <div class="sbar-val">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Three Audit Cards ── -->
+      <div class="audit-cards">
+
+        <div class="audit-card audit-perception glass-card">
+          <div class="audit-card-header">
+            <span class="audit-icon">🔮</span>
+            <div>
+              <h3>Emotional Perception</h3>
+              <span class="audit-tag">Cold Visitor POV</span>
+            </div>
+          </div>
+          <div class="audit-card-body markdown-body" id="perceptionBody">
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line w80"></div>
+            <div class="skeleton-line w60"></div>
+          </div>
+        </div>
+
+        <div class="audit-card audit-gap glass-card">
+          <div class="audit-card-header">
+            <span class="audit-icon">🧠</span>
+            <div>
+              <h3>The Psychological Gap</h3>
+              <span class="audit-tag">Why You're Not Growing</span>
+            </div>
+          </div>
+          <div class="audit-card-body markdown-body" id="gapBody">
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line w80"></div>
+            <div class="skeleton-line w60"></div>
+          </div>
+        </div>
+
+        <div class="audit-card audit-rewrite glass-card">
+          <div class="audit-card-header">
+            <span class="audit-icon">✍️</span>
+            <div>
+              <h3>The Rewrite</h3>
+              <span class="audit-tag">Concrete Transformation</span>
+            </div>
+          </div>
+          <div class="audit-card-body" id="rewriteBody">
+            <div class="skeleton-line"></div>
+            <div class="skeleton-line w80"></div>
+            <div class="skeleton-line w60"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- CTA to Chat ── -->
+      <div class="chat-prompt-banner glass-card">
+        <div class="cpb-left">
+          <div class="cpb-icon">💬</div>
+          <div>
+            <h3>Want to go deeper?</h3>
+            <p>Ask BrandMind anything — strategy, captions, positioning, your 30-day growth plan.</p>
+          </div>
+        </div>
+        <button class="btn-primary" id="openChatBtn">Talk to BrandMind →</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════════
+       SECTION 4 — Chat Advisor
+  ════════════════════════════════════════════════════════════════════ -->
+  <section id="chat" class="section section-chat" style="display:none">
+    <div class="chat-shell">
+
+      <!-- Sidebar ── -->
+      <aside class="chat-sidebar glass-card">
+        <div class="sidebar-brand" id="sidebarBrand">
+          <div class="sb-avatar" id="sbAvatar">B</div>
+          <div class="sb-info">
+            <div class="sb-name" id="sbName">Your Brand</div>
+            <div class="sb-score" id="sbScore">Score: —</div>
+          </div>
+        </div>
+
+        <div class="sidebar-section-label">Quick Actions</div>
+        <div class="quick-actions" id="quickActions">
+          <button class="qa-btn" data-msg="What should I post next week? Give me a specific, day-by-day content plan tailored to my brand.">📅 Plan next week's content</button>
+          <button class="qa-btn" data-msg="Rewrite my Instagram bio from scratch to make it emotionally resonant and identity-driven. Make it feel magnetic.">✍️ Rewrite my bio</button>
+          <button class="qa-btn" data-msg="Give me a concrete 30-day growth roadmap. Not generic steps — specific actions for my brand, my audience, my challenge.">🗺️ 30-day growth roadmap</button>
+          <button class="qa-btn" data-msg="Why am I not growing? Be brutally honest with me about what's actually holding my brand back.">🔍 Why am I stuck?</button>
+          <button class="qa-btn" data-msg="Which Jungian archetype should I be fully embodying? How do I show up as that archetype in my content this week?">🎭 Optimize my archetype</button>
+          <button class="qa-btn" data-msg="What's the single biggest change I can make right now — this week — that would move the needle the most?">⚡ My biggest quick win</button>
+        </div>
+
+        <button class="btn-ghost btn-sm sidebar-back-btn" id="backToAnalysisBtn">← Back to Analysis</button>
+      </aside>
+
+      <!-- Main Chat ── -->
+      <div class="chat-main">
+        <div class="chat-topbar">
+          <div class="chat-ai-badge">
+            <span class="ai-brain">🧠</span>
+            <div>
+              <div class="ai-name">BrandMind AI</div>
+              <div class="ai-status">
+                <span class="status-dot-green"></span>
+                Online · Knows your brand
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages" role="log" aria-live="polite">
+          <!-- Messages injected by JS -->
+        </div>
+
+        <div class="chat-input-row">
+          <div class="chat-input-box">
+            <textarea
+              id="chatInput"
+              placeholder="Ask anything about your brand strategy..."
+              rows="1"
+              maxlength="2000"
+              aria-label="Chat message"
+            ></textarea>
+            <button class="send-btn" id="sendBtn" aria-label="Send message" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+            </button>
+          </div>
+          <div class="chat-footer-hint">BrandMind has full context of your brand audit. Be specific — you'll get sharper answers.</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ── Loading Overlay ────────────────────────────────────────────── -->
+  <div class="loading-overlay" id="loadingOverlay" style="display:none" role="status" aria-label="Analyzing your brand">
+    <div class="loading-panel glass-card">
+      <div class="loading-brain-wrap">
+        <div class="loading-brain">🧠</div>
+        <div class="loading-pulse-ring"></div>
+      </div>
+      <h3 class="loading-title">Reading your brand...</h3>
+      <div class="loading-steps" id="loadingSteps">
+        <div class="ls-step active" data-index="0">Analyzing your emotional tone</div>
+        <div class="ls-step" data-index="1">Detecting your brand archetype</div>
+        <div class="ls-step" data-index="2">Identifying the psychological gap</div>
+        <div class="ls-step" data-index="3">Crafting your personalized rewrite</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
