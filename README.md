@@ -1,4 +1,4 @@
-# BrandMind AI 🧠
+# Percepta 🧠
 
 > Emotionally intelligent digital brand advisor — powered by Behavioral Psychology & Google Gemini AI
 
@@ -6,7 +6,7 @@
 
 ## What It Does
 
-BrandMind reads the **emotional fingerprint** of your brand and gives you:
+Percepta reads the **emotional fingerprint** of your brand and gives you:
 
 1. **🔮 Emotional Perception** — How a cold visitor actually *feels* when they land on your brand
 2. **🧠 The Psychological Gap** — The exact psychological mechanism (archetype mismatch, identity dissonance, cognitive friction) causing low engagement
@@ -60,7 +60,7 @@ npm start
 You'll see:
 ```
 ╔══════════════════════════════════════════╗
-║   🧠  BrandMind AI — Server Running      ║
+║   🧠  Percepta — Server Running      ║
 ╠══════════════════════════════════════════╣
 ║   URL  → http://localhost:3000           ║
 ║   Key  → ✅ Gemini API key loaded        ║
@@ -76,7 +76,7 @@ Navigate to **http://localhost:3000** in your browser.
 ## Project Structure
 
 ```
-brandmind-ai/
+Percepta-ai/
 ├── server.js           ← Express backend (Gemini API integration)
 ├── package.json        ← Node dependencies
 ├── .env                ← Your API key (NEVER commit this)
