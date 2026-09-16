@@ -408,6 +408,18 @@
 
       </div>
 
+      <!-- CTA to Content Strategy ── -->
+      <div class="chat-prompt-banner glass-card content-strategy-cta">
+        <div class="cpb-left">
+          <div class="cpb-icon">🗓️</div>
+          <div>
+            <h3>Get your Content Strategy</h3>
+            <p>3 Reel scripts, 7 ready-to-post captions & a 30-day content map — all built from your brand's psychology.</p>
+          </div>
+        </div>
+        <button class="btn-primary" id="generateContentBtn">Generate Strategy →</button>
+      </div>
+
       <!-- CTA to Chat ── -->
       <div class="chat-prompt-banner glass-card">
         <div class="cpb-left">
@@ -418,6 +430,49 @@
           </div>
         </div>
         <button class="btn-primary" id="openChatBtn">Talk to Prespecta →</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════════════════
+       SECTION 4 — Content Strategy
+  ════════════════════════════════════════════════════════════════════ -->
+  <section id="content" class="section" style="display:none">
+    <div class="container">
+
+      <div class="section-header">
+        <div class="section-badge">🗓️ Content Strategy</div>
+        <h2>Your Psychological Content Blueprint</h2>
+        <p>Every piece engineered from your brand's archetype, your audience's psychology, and your specific conversion gap.</p>
+      </div>
+
+      <!-- Loading state -->
+      <div id="contentLoading" class="content-loading" style="display:none">
+        <div class="content-loading-inner">
+          <div class="content-spinner"></div>
+          <div class="content-loading-steps">
+            <p id="contentLoadStep">🧠 Analyzing your brand archetype...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content tabs -->
+      <div id="contentOutput" style="display:none">
+        <div class="content-tabs">
+          <button class="content-tab active" data-tab="reels">🎬 Reel Scripts</button>
+          <button class="content-tab" data-tab="captions">✍️ Caption Arsenal</button>
+          <button class="content-tab" data-tab="calendar">📅 30-Day Map</button>
+        </div>
+        <div class="content-panel" id="panelReels"></div>
+        <div class="content-panel" id="panelCaptions" style="display:none"></div>
+        <div class="content-panel" id="panelCalendar" style="display:none"></div>
+      </div>
+
+      <!-- Back + Chat -->
+      <div class="content-actions">
+        <button class="btn-ghost" id="backToAnalysisBtn">← Back to Audit</button>
+        <button class="btn-primary" id="contentToChatBtn">Talk to Prespecta →</button>
       </div>
 
     </div>

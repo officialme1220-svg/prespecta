@@ -1335,3 +1335,28 @@ a { text-decoration: none; color: inherit; }
 .svg-defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 
 @keyframes slideDown { from { opacity: 0; transform: translateX(-50%) translateY(-12px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+
+/* -- Content Strategy Section -------------------------------------------- */
+.content-strategy-cta { border-color: rgba(167,139,250,0.3); background: rgba(167,139,250,0.05); margin-bottom: 1rem; }
+.section-header { text-align: center; margin-bottom: 2.5rem; }
+.section-header h2 { font-size: clamp(1.6rem,4vw,2.2rem); font-weight: 700; margin: 0.5rem 0; }
+.section-header p { color: var(--text-muted); max-width: 560px; margin: 0 auto; }
+.content-loading { display: flex; justify-content: center; padding: 4rem 0; }
+.content-loading-inner { text-align: center; }
+.content-spinner { width: 48px; height: 48px; border: 3px solid rgba(167,139,250,0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1.5rem; }
+.content-loading-steps p { color: var(--text-muted); font-size: 0.95rem; animation: pulse 2s ease-in-out infinite; }
+.content-tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; background: rgba(255,255,255,0.03); border-radius: 12px; padding: 4px; }
+.content-tab { flex: 1; padding: 0.7rem 1rem; border: none; border-radius: 9px; background: transparent; color: var(--text-muted); font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+.content-tab.active { background: rgba(167,139,250,0.15); color: var(--accent); }
+.content-tab:hover:not(.active) { background: rgba(255,255,255,0.05); color: var(--text); }
+.content-panel { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 2rem; line-height: 1.8; }
+.content-panel h3 { color: var(--accent); font-size: 1.1rem; margin: 1.5rem 0 0.75rem; border-bottom: 1px solid rgba(167,139,250,0.2); padding-bottom: 0.5rem; }
+.content-panel h3:first-child { margin-top: 0; }
+.content-panel strong { color: #c4b5fd; }
+.content-panel table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.88rem; }
+.content-panel th { background: rgba(167,139,250,0.1); color: var(--accent); padding: 0.6rem 1rem; text-align: left; font-weight: 600; }
+.content-panel td { padding: 0.6rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: top; color: var(--text-muted); }
+.content-panel tr:hover td { background: rgba(255,255,255,0.02); color: var(--text); }
+.content-actions { display: flex; gap: 1rem; justify-content: center; margin-top: 2rem; flex-wrap: wrap; }
+.btn-ghost { padding: 0.75rem 1.5rem; border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; background: transparent; color: var(--text-muted); cursor: pointer; font-size: 0.95rem; transition: all 0.2s; }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }

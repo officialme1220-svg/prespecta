@@ -640,5 +640,98 @@ checkHealth();
 // ── Init: show hero ───────────────────────────────────────────────────────
 showSection('hero');
 
+// ── Content Strategy ──────────────────────────────────────────────────────
+const CONTENT_LOAD_STEPS = [
+  '🧠 Analyzing your brand archetype...',
+  '🎬 Engineering Reel hooks from your psychology...',
+  '✍️ Crafting archetype-specific captions...',
+  '📅 Building your 30-day narrative arc...',
+  '🔬 Applying identity disruption patterns...',
+  '✨ Finalizing your content blueprint...',
+];
+let contentStepTimer = null;
+
+function startContentLoadSteps() {
+  let i = 0;
+  const el = $('contentLoadStep');
+  contentStepTimer = setInterval(() => {
+    if (el) el.textContent = CONTENT_LOAD_STEPS[i % CONTENT_LOAD_STEPS.length];
+    i++;
+  }, 3000);
+}
+
+function stopContentLoadSteps() {
+  clearInterval(contentStepTimer);
+}
+
+function parseContentSections(text) {
+  const reelsMatch = text.match(/##\s*🎬\s*REEL SCRIPTS([\s\S]*?)(?=##\s*✍️|$)/i);
+  const captionsMatch = text.match(/##\s*✍️\s*CAPTION ARSENAL([\s\S]*?)(?=##\s*📅|$)/i);
+  const calendarMatch = text.match(/##\s*📅\s*30-DAY CONTENT MAP([\s\S]*?)$/i);
+  return {
+    reels: reelsMatch?.[1]?.trim() || text,
+    captions: captionsMatch?.[1]?.trim() || '',
+    calendar: calendarMatch?.[1]?.trim() || '',
+  };
+}
+
+function renderContentTabs(parsed) {
+  $('panelReels').innerHTML = renderMD('## 🎬 Reel Scripts\n' + parsed.reels);
+  $('panelCaptions').innerHTML = renderMD('## ✍️ Caption Arsenal\n' + parsed.captions);
+  $('panelCalendar').innerHTML = renderMD('## 📅 30-Day Content Map\n' + parsed.calendar);
+}
+
+// Tab switching
+document.querySelectorAll('.content-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.content-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.content-panel').forEach(p => p.style.display = 'none');
+    tab.classList.add('active');
+    const panelId = { reels: 'panelReels', captions: 'panelCaptions', calendar: 'panelCalendar' }[tab.dataset.tab];
+    if (panelId) $(panelId).style.display = 'block';
+  });
+});
+
+$('generateContentBtn')?.addEventListener('click', async () => {
+  showSection('content');
+  $('contentLoading').style.display = 'flex';
+  $('contentOutput').style.display = 'none';
+  startContentLoadSteps();
+
+  try {
+    const res = await fetch('/api/content-strategy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        brandContext: state.brandContext,
+        scores: state.scores,
+        auditSummary: ''
+      })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Content generation failed');
+
+    const parsed = parseContentSections(data.content);
+    renderContentTabs(parsed);
+
+    $('contentLoading').style.display = 'none';
+    $('contentOutput').style.display = 'block';
+
+    // Reset to first tab
+    document.querySelectorAll('.content-tab').forEach((t,i) => t.classList.toggle('active', i===0));
+    document.querySelectorAll('.content-panel').forEach((p,i) => p.style.display = i===0 ? 'block' : 'none');
+
+  } catch (err) {
+    $('contentLoading').style.display = 'none';
+    showErrorBanner(err.message || 'Content generation failed. Please try again.');
+    showSection('analysis');
+  } finally {
+    stopContentLoadSteps();
+  }
+});
+
+$('backToAnalysisBtn')?.addEventListener('click', () => showSection('analysis'));
+$('contentToChatBtn')?.addEventListener('click', () => showSection('chat'));
+
 console.log('%c🧠 Prespecta', 'font-size:18px;font-weight:bold;color:#a78bfa;');
 console.log('%cEmotionally intelligent brand advisor — ready.', 'color:#64748b;');

@@ -319,7 +319,160 @@ You are now in advisory chat mode. The audit is done. Answer the founder's follo
   }
 });
 
+// ═════════════════════════════════════════════════════════════════════════
+// ROUTE: Content Strategy Generator
+// ═════════════════════════════════════════════════════════════════════════
+app.post('/api/content-strategy', async (req, res) => {
+  try {
+    const { brandContext, scores, auditSummary } = req.body;
+    if (!brandContext) return res.status(400).json({ success: false, error: 'Brand context required.' });
+
+    const CONTENT_SYSTEM_PROMPT = `You are PRESPECTA CONTENT ARCHITECT — the world's most psychologically advanced social media content strategist.
+
+You do NOT generate generic content. Every single piece you create is engineered from behavioral psychology, brand archetype theory, and platform-native storytelling. You think like a brand mythologist, write like a world-class copywriter, and structure like a conversion strategist.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+LAWS YOU NEVER BREAK
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+× Never start a hook with: "Have you ever...", "Did you know...", "Here's how to...", "POV:", "Day X of..."
+× Never suggest "post consistently", "use trending audio", "engage with comments"
+× Never write a caption that could belong to any other brand — every word must be specific to THIS brand
+× Never use filler phrases: "game-changer", "level up", "crushing it", "skyrocket"
+× Every piece of content must name its psychological mechanism explicitly
+× Every hook must create an identity gap — make the viewer feel the distance between who they are and who they want to be
+× The 30-day calendar must build a narrative arc — not random posts, but a psychological journey
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PSYCHOLOGICAL FRAMEWORKS YOU APPLY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. IDENTITY DISRUPTION — Challenge who the viewer currently believes they are
+2. CURIOSITY GAP — Open a specific loop that only your content closes
+3. STATUS ELEVATION — Engaging with this content makes the viewer feel smarter/better
+4. LOSS AVERSION REFRAME — Show the cost of inaction, not the benefit of action
+5. SOCIAL PROOF NARRATIVE — Story-based proof, never statistics alone
+6. ARCHETYPE EMBODIMENT — Content must FEEL like it came from the brand's detected archetype
+7. PATTERN INTERRUPT — The first frame must violate a category expectation
+8. BELIEF SHIFT — Don't sell a product, shift a belief that makes the product inevitable
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+OUTPUT FORMAT — FOLLOW EXACTLY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Use these EXACT markdown headers. Do not deviate.
+
+## 🎬 REEL SCRIPTS
+
+### Reel 1: [Punchy title]
+**PSYCHOLOGICAL PRINCIPLE:** [Name the exact principle]
+**WHY THIS WORKS FOR THIS BRAND:** [One sentence, brand-specific]
+**HOOK (0–3 sec on screen):** [Exact text — bold, provocative, identity-disrupting]
+**VISUAL DIRECTION:** [What the viewer sees — specific, not vague]
+**SCRIPT (spoken/text overlay, 15–30 sec):** [Full word-for-word script]
+**CLOSE (final frame):** [Exact closing line — no generic CTAs]
+
+### Reel 2: [Punchy title]
+[Same structure]
+
+### Reel 3: [Punchy title]
+[Same structure]
+
+---
+
+## ✍️ CAPTION ARSENAL
+
+### Caption 1 — [Psychological Trigger Name]
+**POST TYPE:** [Reel / Carousel / Single Image]
+**PSYCHOLOGICAL TRIGGER:** [Exact name]
+**WHAT THIS DOES:** [One sentence]
+[Full caption — ready to post, no placeholders, no brackets]
+[Line breaks as they should appear on Instagram]
+.
+.
+.
+[Hashtags if relevant — max 5, niche-specific, never generic]
+
+### Caption 2 — [Psychological Trigger Name]
+[Same structure]
+
+[Continue for all 7 captions]
+
+---
+
+## 📅 30-DAY CONTENT MAP
+
+**NARRATIVE ARC THEME:** [The overall psychological journey this 30 days builds]
+**END GOAL:** [What the audience will feel/believe by Day 30]
+
+### Week 1 — [Theme title]
+**Week Intent:** [What psychological shift you're creating this week]
+| Day | Post Type | Psychological Angle | Brief Description |
+|-----|-----------|--------------------|--------------------|
+| 1 | | | |
+[Fill all 7 days]
+
+### Week 2 — [Theme title]
+**Week Intent:** [Psychological shift]
+| Day | Post Type | Psychological Angle | Brief Description |
+|-----|-----------|--------------------|--------------------|
+| 8 | | | |
+[Fill days 8-14]
+
+### Week 3 — [Theme title]
+[Days 15-21]
+
+### Week 4 — [Theme title]
+[Days 22-30]`;
+
+    const contentPrompt = `Generate a complete, deeply psychological content strategy for this brand.
+
+BRAND PROFILE:
+━━━━━━━━━━━━━━━━━━━━━━━━
+Name: ${brandContext.name}
+Industry: ${brandContext.industry}
+Target Audience: ${brandContext.targetAudience}
+Instagram Handle: @${brandContext.instagramHandle || 'not provided'}
+Followers: ${brandContext.followers || 'unknown'}
+Avg Likes: ${brandContext.avgLikes || 'unknown'}
+Avg Comments: ${brandContext.avgComments || 'unknown'}
+Bio: ${brandContext.bio || 'not provided'}
+Actual Captions: ${brandContext.captions || 'not provided'}
+Brand Story: ${brandContext.brandStory || 'not provided'}
+Biggest Challenge: ${brandContext.challenge || 'not provided'}
+
+AUDIT FINDINGS:
+━━━━━━━━━━━━━━━━━━━━━━━━
+Detected Archetype: ${scores?.detectedArchetype || 'unknown'}
+Archetype Description: ${scores?.archetypeDescription || 'unknown'}
+Emotional Tone: ${scores?.emotionalTone || 'unknown'}
+Overall Brand Score: ${scores?.overallScore || 'unknown'}/100
+Content Score: ${scores?.contentScore || 'unknown'}/100
+Messaging Score: ${scores?.messagingScore || 'unknown'}/100
+Positioning Score: ${scores?.positioningScore || 'unknown'}/100
+Audience Score: ${scores?.audienceScore || 'unknown'}/100
+
+${auditSummary ? `KEY AUDIT INSIGHT:\n${auditSummary}` : ''}
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+Now generate the complete content strategy. Make every single piece of content feel like it was written by someone who has studied this brand for months. Reference their actual words, their specific challenge, their exact archetype. This brand deserves content that no other brand could post. Deliver that.`;
+
+    const response = await withRetry(() => ai.models.generateContent({
+      model: 'gemini-3.6-flash',
+      config: { systemInstruction: CONTENT_SYSTEM_PROMPT },
+      contents: [{ role: 'user', parts: [{ text: contentPrompt }] }]
+    }));
+
+    res.json({ success: true, content: response.text });
+
+  } catch (err) {
+    const raw = JSON.stringify(err?.message || err) || '';
+    console.error('❌ /api/content-strategy error:', raw);
+    let userMessage = 'Content generation failed. Please try again.';
+    if (raw.includes('503') || raw.includes('UNAVAILABLE')) userMessage = 'Gemini is busy right now. Please wait 30 seconds and try again.';
+    res.status(500).json({ success: false, error: userMessage });
+  }
+});
+
 // ─── Health Check ─────────────────────────────────────────────────────────
+
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'online',
