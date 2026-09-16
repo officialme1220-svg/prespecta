@@ -47,10 +47,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 // ══════════════════════════════════════════════════════════════════════════
-// Percepta PSYCHOLOGICAL ADVISOR — SYSTEM PROMPT
+// Prespecta PSYCHOLOGICAL ADVISOR — SYSTEM PROMPT
 // Anchored in Jungian Archetypes, Behavioral Economics & Identity Psychology
 // ══════════════════════════════════════════════════════════════════════════
-const Percepta_SYSTEM_PROMPT = `You are Percepta — the world's most emotionally intelligent digital brand advisor.
+const Prespecta_SYSTEM_PROMPT = `You are Prespecta — the world's most emotionally intelligent digital brand advisor.
 
 You are not a marketing chatbot. You are trained in behavioral psychology, Jungian brand archetypes, consumer identity theory, and behavioral economics. Founders come to you because they're working hard but not seeing results — and you give them the honest, precise diagnosis that changes everything.
 
@@ -149,7 +149,7 @@ app.post('/api/analyze', upload.array('screenshots', 6), async (req, res) => {
     const files = req.files || [];
 
     // Build the audit prompt
-    const auditPrompt = `Please perform a complete Percepta psychological brand audit.
+    const auditPrompt = `Please perform a complete Prespecta psychological brand audit.
 
 BRAND PROFILE:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -193,7 +193,7 @@ Deliver the full three-section brand audit. Be honest. Be specific. This founder
     const [auditResponse, scoreResponse] = await Promise.all([
       withRetry(() => ai.models.generateContent({
         model: 'gemini-3.6-flash',
-        config: { systemInstruction: Percepta_SYSTEM_PROMPT },
+        config: { systemInstruction: Prespecta_SYSTEM_PROMPT },
         contents: [{ role: 'user', parts: contentParts }]
       })),
       withRetry(() => ai.models.generateContent({
@@ -307,7 +307,7 @@ You are now in advisory chat mode. The audit is done. Answer the founder's follo
 
     const response = await ai.models.generateContent({
       model: 'gemini-3.6-flash',
-      config: { systemInstruction: Percepta_SYSTEM_PROMPT + brandContextBlock },
+      config: { systemInstruction: Prespecta_SYSTEM_PROMPT + brandContextBlock },
       contents
     });
 
@@ -333,7 +333,7 @@ app.listen(PORT, '0.0.0.0', () => {
   const keyOk = process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'your_gemini_api_key_here';
   console.log(`
   ╔══════════════════════════════════════════╗
-  ║   🧠  Percepta — Server Running      ║
+  ║   🧠  Prespecta — Server Running      ║
   ╠══════════════════════════════════════════╣
   ║   URL  → http://localhost:${PORT}           ║
   ║   Key  → ${keyOk ? '✅ Gemini API key loaded' : '⚠️  Set GEMINI_API_KEY in .env'}  ║

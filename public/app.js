@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════════
-   Percepta — Frontend Logic
+   Prespecta — Frontend Logic
    Multi-step SPA · Drag-drop uploads · AI analysis · Chat advisor
    ═══════════════════════════════════════════════════════════════════════ */
 
@@ -629,10 +629,10 @@ async function checkHealth() {
     const res = await fetch('/api/health');
     const data = await res.json();
     if (!data.apiKeySet) {
-      console.warn('⚠️ Percepta: GEMINI_API_KEY not set in .env. Analysis will fail.');
+      console.warn('⚠️ Prespecta: GEMINI_API_KEY not set in .env. Analysis will fail.');
     }
   } catch (e) {
-    console.warn('Percepta server health check failed:', e.message);
+    console.warn('Prespecta server health check failed:', e.message);
   }
 }
 checkHealth();
@@ -640,5 +640,5 @@ checkHealth();
 // ── Init: show hero ───────────────────────────────────────────────────────
 showSection('hero');
 
-console.log('%c🧠 Percepta', 'font-size:18px;font-weight:bold;color:#a78bfa;');
+console.log('%c🧠 Prespecta', 'font-size:18px;font-weight:bold;color:#a78bfa;');
 console.log('%cEmotionally intelligent brand advisor — ready.', 'color:#64748b;');
