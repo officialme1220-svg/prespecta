@@ -44,7 +44,14 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ─── Gemini Client ────────────────────────────────────────────────────────
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const GEMINI_KEY = process.env.GEMINI_API_KEY || '';
+const ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
+
+// ─── Startup Diagnostics ──────────────────────────────────────────────────
+console.log('🔑 GEMINI_API_KEY loaded:', GEMINI_KEY ? `YES (starts with: ${GEMINI_KEY.slice(0,8)}...)` : 'NO — KEY IS MISSING');
+console.log('🌍 NODE_ENV:', process.env.NODE_ENV || 'not set');
+console.log('🔌 PORT:', process.env.PORT || '3000 (default)');
+
 
 // ══════════════════════════════════════════════════════════════════════════
 // Prespecta PSYCHOLOGICAL ADVISOR — SYSTEM PROMPT
@@ -259,16 +266,16 @@ Return ONLY this exact JSON structure:
     });
 
   } catch (err) {
-    const raw = JSON.stringify(err?.message || err) || '';
-    console.error('❌ /api/analyze error:', raw);
+    const raw = String(err?.message || JSON.stringify(err) || 'unknown error');
+    console.error('❌ /api/analyze error FULL:', raw);
 
-    let userMessage = 'Analysis failed. Please try again.';
+    let userMessage = `Error: ${raw.slice(0, 200)}`;
     if (raw.includes('API_KEY') || raw.includes('API key') || raw.includes('PERMISSION_DENIED'))
-      userMessage = 'Invalid or missing Gemini API key. Check your .env file and restart the server.';
+      userMessage = 'Invalid or missing Gemini API key. Check Railway environment variables.';
     else if (raw.includes('503') || raw.includes('UNAVAILABLE') || raw.includes('high demand'))
-      userMessage = 'Gemini is experiencing high demand right now. Please wait 30 seconds and try again.';
+      userMessage = 'Gemini is experiencing high demand. Please wait 30 seconds and try again.';
     else if (raw.includes('quota') || raw.includes('RESOURCE_EXHAUSTED'))
-      userMessage = 'API quota exceeded. Check your usage at aistudio.google.com.';
+      userMessage = 'API quota exceeded. Check usage at aistudio.google.com.';
 
     res.status(500).json({ success: false, error: userMessage });
   }
