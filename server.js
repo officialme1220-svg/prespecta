@@ -1,6 +1,5 @@
 import express from 'express';
 import multer from 'multer';
-import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -43,14 +42,48 @@ const upload = multer({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ─── Gemini Client ────────────────────────────────────────────────────────
+// ─── Gemini REST API — direct fetch (no SDK dependency) ──────────────────
 const GEMINI_KEY = process.env.GEMINI_API_KEY || '';
-const ai = new GoogleGenAI({ apiKey: GEMINI_KEY });
+const GEMINI_MODEL = 'gemini-2.0-flash';
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 // ─── Startup Diagnostics ──────────────────────────────────────────────────
-console.log('🔑 GEMINI_API_KEY loaded:', GEMINI_KEY ? `YES (starts with: ${GEMINI_KEY.slice(0,8)}...)` : 'NO — KEY IS MISSING');
+console.log('🔑 GEMINI_API_KEY:', GEMINI_KEY ? `YES — starts with ${GEMINI_KEY.slice(0,10)}` : 'MISSING ❌');
 console.log('🌍 NODE_ENV:', process.env.NODE_ENV || 'not set');
 console.log('🔌 PORT:', process.env.PORT || '3000 (default)');
+
+// ─── Core Gemini caller (direct REST, no SDK) ─────────────────────────────
+async function callGemini(systemPrompt, parts, retries = 3) {
+  const body = {
+    system_instruction: { parts: [{ text: systemPrompt }] },
+    contents: [{ role: 'user', parts }],
+    generationConfig: { temperature: 0.9, maxOutputTokens: 8192 }
+  };
+
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    const res = await fetch(`${GEMINI_URL}?key=${GEMINI_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(120000)
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      const errMsg = data?.error?.message || `HTTP ${res.status}`;
+      const is503 = res.status === 503 || errMsg.includes('UNAVAILABLE');
+      if (is503 && attempt < retries) {
+        console.log(`⏳ Gemini busy — retrying in ${attempt * 2}s...`);
+        await new Promise(r => setTimeout(r, attempt * 2000));
+        continue;
+      }
+      throw new Error(errMsg);
+    }
+
+    return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  }
+}
 
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -189,26 +222,15 @@ Deliver the full three-section brand audit. Be honest. Be specific. This founder
     const contentParts = [{ text: auditPrompt }];
     for (const file of files) {
       contentParts.push({
-        inlineData: {
-          mimeType: file.mimetype,
+        inline_data: {
+          mime_type: file.mimetype,
           data: file.buffer.toString('base64')
         }
       });
     }
 
-    // Run audit and scoring in parallel, with auto-retry for 503 overload
-    const [auditResponse, scoreResponse] = await Promise.all([
-      withRetry(() => ai.models.generateContent({
-        model: 'gemini-3.6-flash',
-        config: { systemInstruction: Prespecta_SYSTEM_PROMPT },
-        contents: [{ role: 'user', parts: contentParts }]
-      })),
-      withRetry(() => ai.models.generateContent({
-        model: 'gemini-3.6-flash',
-        contents: [{
-          role: 'user',
-          parts: [{
-            text: `You are a brand diagnostics engine. Score this brand HONESTLY and return a raw JSON object only — no markdown, no explanation, no code fences.
+    // Score prompt
+    const scorePrompt = `You are a brand diagnostics engine. Score this brand HONESTLY and return a raw JSON object only — no markdown, no explanation, no code fences.
 
 Brand: ${brand.name}
 Industry: ${brand.industry}
@@ -229,41 +251,40 @@ Return ONLY this exact JSON structure:
   "messagingScore": <integer 0-100>,
   "detectedArchetype": "<one of the 12 Jungian archetypes>",
   "archetypeDescription": "<one vivid sentence about the current archetype energy — honest>",
-  "emotionalTone": "<2-4 word description of current brand tone e.g. 'Confident but distant' or 'Warm but invisible'>"
-}`
-          }]
-        }]
-      }))
+  "emotionalTone": "<2-4 word description of current brand tone>"
+}`;
+
+    // Run audit and scoring in parallel using direct REST fetch
+    const [auditText, scoreText] = await Promise.all([
+      callGemini(Prespecta_SYSTEM_PROMPT, contentParts),
+      callGemini('You are a brand scoring engine. Return only raw JSON, no markdown.', [{ text: scorePrompt }])
     ]);
 
     // Parse scores safely
     let scores = {
-      overallScore: 55,
-      contentScore: 60,
-      audienceScore: 50,
-      positioningScore: 52,
-      messagingScore: 58,
+      overallScore: 55, contentScore: 60, audienceScore: 50,
+      positioningScore: 52, messagingScore: 58,
       detectedArchetype: 'Creator',
-      archetypeDescription: 'Building something real but not yet showing the full picture to the world.',
+      archetypeDescription: 'Building something real but not yet showing the full picture.',
       emotionalTone: 'Ambitious but unclear'
     };
 
     try {
-      const rawScore = scoreResponse.text
-        .replace(/```json\n?|\n?```/gi, '')
-        .trim();
+      const rawScore = scoreText.replace(/```json\n?|\n?```/gi, '').trim();
       const parsed = JSON.parse(rawScore);
       scores = { ...scores, ...parsed };
+
     } catch (parseErr) {
       console.warn('Score parse failed, using defaults:', parseErr.message);
     }
 
     res.json({
       success: true,
-      analysis: auditResponse.text,
+      analysis: auditText,
       scores,
       brandContext: brand
     });
+
 
   } catch (err) {
     const raw = String(err?.message || JSON.stringify(err) || 'unknown error');
@@ -302,29 +323,36 @@ Their Challenge: ${brandContext.challenge || 'N/A'}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 You are now in advisory chat mode. The audit is done. Answer the founder's follow-up questions with depth and specificity. Keep responses focused, personal, and actionable. No generic advice.` : '';
 
-    // Build conversation history
+    // Build conversation history for REST API
     const contents = history
-      .slice(-10) // keep last 10 turns to manage context
-      .map(msg => ({
-        role: msg.role,
-        parts: [{ text: msg.content }]
-      }));
-
+      .slice(-10)
+      .map(msg => ({ role: msg.role, parts: [{ text: msg.content }] }));
     contents.push({ role: 'user', parts: [{ text: message }] });
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-3.6-flash',
-      config: { systemInstruction: Prespecta_SYSTEM_PROMPT + brandContextBlock },
-      contents
+    // Direct REST call with full conversation history
+    const chatBody = {
+      system_instruction: { parts: [{ text: Prespecta_SYSTEM_PROMPT + brandContextBlock }] },
+      contents,
+      generationConfig: { temperature: 0.9, maxOutputTokens: 4096 }
+    };
+    const chatRes = await fetch(`${GEMINI_URL}?key=${GEMINI_KEY}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(chatBody),
+      signal: AbortSignal.timeout(60000)
     });
+    const chatData = await chatRes.json();
+    if (!chatRes.ok) throw new Error(chatData?.error?.message || `HTTP ${chatRes.status}`);
+    const reply = chatData.candidates?.[0]?.content?.parts?.[0]?.text || '';
 
-    res.json({ success: true, reply: response.text });
+    res.json({ success: true, reply });
 
   } catch (err) {
     console.error('❌ /api/chat error:', err.message);
-    res.status(500).json({ success: false, error: 'Chat failed. Please try again.' });
+    res.status(500).json({ success: false, error: `Chat failed: ${err.message}` });
   }
 });
+
 
 // ═════════════════════════════════════════════════════════════════════════
 // ROUTE: Content Strategy Generator
@@ -461,22 +489,15 @@ ${auditSummary ? `KEY AUDIT INSIGHT:\n${auditSummary}` : ''}
 ━━━━━━━━━━━━━━━━━━━━━━━━
 Now generate the complete content strategy. Make every single piece of content feel like it was written by someone who has studied this brand for months. Reference their actual words, their specific challenge, their exact archetype. This brand deserves content that no other brand could post. Deliver that.`;
 
-    const response = await withRetry(() => ai.models.generateContent({
-      model: 'gemini-3.6-flash',
-      config: { systemInstruction: CONTENT_SYSTEM_PROMPT },
-      contents: [{ role: 'user', parts: [{ text: contentPrompt }] }]
-    }));
-
-    res.json({ success: true, content: response.text });
+    const contentText = await callGemini(CONTENT_SYSTEM_PROMPT, [{ text: contentPrompt }]);
+    res.json({ success: true, content: contentText });
 
   } catch (err) {
-    const raw = JSON.stringify(err?.message || err) || '';
-    console.error('❌ /api/content-strategy error:', raw);
-    let userMessage = 'Content generation failed. Please try again.';
-    if (raw.includes('503') || raw.includes('UNAVAILABLE')) userMessage = 'Gemini is busy right now. Please wait 30 seconds and try again.';
-    res.status(500).json({ success: false, error: userMessage });
+    console.error('❌ /api/content-strategy error:', err.message);
+    res.status(500).json({ success: false, error: `Content generation failed: ${err.message}` });
   }
 });
+
 
 // ─── Health Check ─────────────────────────────────────────────────────────
 
