@@ -44,7 +44,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // ─── Gemini REST API — direct fetch (no SDK dependency) ──────────────────
 const GEMINI_KEY = process.env.GEMINI_API_KEY || '';
-const GEMINI_MODEL = 'gemini-flash-latest';
+const GEMINI_MODEL = 'gemini-flash-lite-latest';
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 // ─── Startup Diagnostics ──────────────────────────────────────────────────
@@ -53,14 +53,22 @@ console.log('🌍 NODE_ENV:', process.env.NODE_ENV || 'not set');
 console.log('🔌 PORT:', process.env.PORT || '3000 (default)');
 
 // ─── Core Gemini caller (direct REST, no SDK) ─────────────────────────────
-async function callGemini(systemPrompt, parts, retries = 3) {
+async function callGemini(systemPrompt, parts, retries = 5) {
   const body = {
     system_instruction: { parts: [{ text: systemPrompt }] },
     contents: [{ role: 'user', parts }],
     generationConfig: { temperature: 0.9, maxOutputTokens: 8192 }
   };
 
+  const delays = [0, 5000, 10000, 20000, 30000]; // exponential backoff
+
   for (let attempt = 1; attempt <= retries; attempt++) {
+    if (attempt > 1) {
+      const wait = delays[attempt - 1] || 30000;
+      console.log(`⏳ Retrying (attempt ${attempt}/${retries}) in ${wait/1000}s...`);
+      await new Promise(r => setTimeout(r, wait));
+    }
+
     const res = await fetch(`${GEMINI_URL}?key=${GEMINI_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -72,18 +80,18 @@ async function callGemini(systemPrompt, parts, retries = 3) {
 
     if (!res.ok) {
       const errMsg = data?.error?.message || `HTTP ${res.status}`;
-      const is503 = res.status === 503 || errMsg.includes('UNAVAILABLE');
-      if (is503 && attempt < retries) {
-        console.log(`⏳ Gemini busy — retrying in ${attempt * 2}s...`);
-        await new Promise(r => setTimeout(r, attempt * 2000));
-        continue;
-      }
+      const isRetryable = res.status === 503 || res.status === 429 || errMsg.includes('UNAVAILABLE') || errMsg.includes('quota');
+      if (isRetryable && attempt < retries) continue;
       throw new Error(errMsg);
     }
 
-    return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (text) return text;
+    if (attempt < retries) continue;
+    throw new Error('Empty response from Gemini');
   }
 }
+
 
 
 // ══════════════════════════════════════════════════════════════════════════
