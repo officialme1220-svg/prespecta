@@ -274,15 +274,12 @@ Return ONLY this exact JSON structure:
   "emotionalTone": "<2-4 word description of current brand tone>"
 }`;
 
-    // Run audit and scoring in parallel using Groq
-    const hasImages = files.length > 0;
-    const userContent = hasImages
-      ? [{ type: 'text', text: auditPrompt }, ...files.map(f => ({ type: 'image_url', image_url: { url: `data:${f.mimetype};base64,${f.buffer.toString('base64')}` } }))]
-      : auditPrompt;
+    // Run audit and scoring in parallel using Groq (text-only, string content)
     const [auditText, scoreText] = await Promise.all([
-      callAI(Prespecta_SYSTEM_PROMPT, userContent, hasImages),
+      callAI(Prespecta_SYSTEM_PROMPT, auditPrompt),
       callAI('You are a brand scoring engine. Return only raw JSON, no markdown.', scorePrompt)
     ]);
+
 
 
     // Parse scores safely
