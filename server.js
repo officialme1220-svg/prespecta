@@ -45,8 +45,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ─── Groq API Setup ───────────────────────────────────────────────────────
 const GROQ_KEY = process.env.GROQ_API_KEY || '';
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_MODEL = 'qwen/qwen3.8-27b';
-const GROQ_VISION_MODEL = 'qwen/qwen3.8-27b'; // use same for vision (text description fallback)
+const GROQ_MODEL = 'openai/gpt-oss-120b';
+const GROQ_VISION_MODEL = 'openai/gpt-oss-120b';
 
 // ─── Startup Diagnostics ──────────────────────────────────────────────────
 console.log('🔑 GROQ_API_KEY:', GROQ_KEY ? `YES — starts with ${GROQ_KEY.slice(0,10)}` : 'MISSING ❌');
