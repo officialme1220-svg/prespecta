@@ -42,56 +42,68 @@ const upload = multer({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ─── Gemini REST API — direct fetch (no SDK dependency) ──────────────────
-const GEMINI_KEY = process.env.GEMINI_API_KEY || '';
-const GEMINI_MODEL = 'gemini-flash-lite-latest';
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+// ─── Groq API Setup ───────────────────────────────────────────────────────
+const GROQ_KEY = process.env.GROQ_API_KEY || '';
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_MODEL = 'llama-3.3-70b-versatile';       // text-only requests
+const GROQ_VISION_MODEL = 'llama-3.2-90b-vision-preview'; // image requests
 
 // ─── Startup Diagnostics ──────────────────────────────────────────────────
-console.log('🔑 GEMINI_API_KEY:', GEMINI_KEY ? `YES — starts with ${GEMINI_KEY.slice(0,10)}` : 'MISSING ❌');
+console.log('🔑 GROQ_API_KEY:', GROQ_KEY ? `YES — starts with ${GROQ_KEY.slice(0,10)}` : 'MISSING ❌');
 console.log('🌍 NODE_ENV:', process.env.NODE_ENV || 'not set');
 console.log('🔌 PORT:', process.env.PORT || '3000 (default)');
 
-// ─── Core Gemini caller (direct REST, no SDK) ─────────────────────────────
-async function callGemini(systemPrompt, parts, retries = 5) {
-  const body = {
-    system_instruction: { parts: [{ text: systemPrompt }] },
-    contents: [{ role: 'user', parts }],
-    generationConfig: { temperature: 0.9, maxOutputTokens: 8192 }
-  };
+// ─── Core AI caller using Groq (OpenAI-compatible, 6000 RPM free) ─────────
+async function callAI(systemPrompt, userContent, hasImages = false) {
+  const model = hasImages ? GROQ_VISION_MODEL : GROQ_MODEL;
 
-  const delays = [0, 5000, 10000, 20000, 30000]; // exponential backoff
+  const messages = [
+    { role: 'system', content: systemPrompt },
+    { role: 'user', content: userContent }
+  ];
 
-  for (let attempt = 1; attempt <= retries; attempt++) {
-    if (attempt > 1) {
-      const wait = delays[attempt - 1] || 30000;
-      console.log(`⏳ Retrying (attempt ${attempt}/${retries}) in ${wait/1000}s...`);
-      await new Promise(r => setTimeout(r, wait));
-    }
+  const res = await fetch(GROQ_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${GROQ_KEY}`
+    },
+    body: JSON.stringify({
+      model,
+      messages,
+      temperature: 0.9,
+      max_tokens: 8192
+    }),
+    signal: AbortSignal.timeout(120000)
+  });
 
-    const res = await fetch(`${GEMINI_URL}?key=${GEMINI_KEY}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-      signal: AbortSignal.timeout(120000)
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      const errMsg = data?.error?.message || `HTTP ${res.status}`;
-      const isRetryable = res.status === 503 || res.status === 429 || errMsg.includes('UNAVAILABLE') || errMsg.includes('quota');
-      if (isRetryable && attempt < retries) continue;
-      throw new Error(errMsg);
-    }
-
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (text) return text;
-    if (attempt < retries) continue;
-    throw new Error('Empty response from Gemini');
-  }
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.error?.message || `HTTP ${res.status}`);
+  const text = data.choices?.[0]?.message?.content;
+  if (!text) throw new Error('Empty response from AI');
+  return text;
 }
 
+// ─── Chat caller (with conversation history) ──────────────────────────────
+async function callAIChat(systemPrompt, messages) {
+  const res = await fetch(GROQ_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${GROQ_KEY}`
+    },
+    body: JSON.stringify({
+      model: GROQ_MODEL,
+      messages: [{ role: 'system', content: systemPrompt }, ...messages],
+      temperature: 0.9,
+      max_tokens: 4096
+    }),
+    signal: AbortSignal.timeout(60000)
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data?.error?.message || `HTTP ${res.status}`);
+  return data.choices?.[0]?.message?.content || '';
+}
 
 
 // ══════════════════════════════════════════════════════════════════════════
@@ -262,11 +274,16 @@ Return ONLY this exact JSON structure:
   "emotionalTone": "<2-4 word description of current brand tone>"
 }`;
 
-    // Run audit and scoring in parallel using direct REST fetch
+    // Run audit and scoring in parallel using Groq
+    const hasImages = files.length > 0;
+    const userContent = hasImages
+      ? [{ type: 'text', text: auditPrompt }, ...files.map(f => ({ type: 'image_url', image_url: { url: `data:${f.mimetype};base64,${f.buffer.toString('base64')}` } }))]
+      : auditPrompt;
     const [auditText, scoreText] = await Promise.all([
-      callGemini(Prespecta_SYSTEM_PROMPT, contentParts),
-      callGemini('You are a brand scoring engine. Return only raw JSON, no markdown.', [{ text: scorePrompt }])
+      callAI(Prespecta_SYSTEM_PROMPT, userContent, hasImages),
+      callAI('You are a brand scoring engine. Return only raw JSON, no markdown.', scorePrompt)
     ]);
+
 
     // Parse scores safely
     let scores = {
@@ -331,29 +348,15 @@ Their Challenge: ${brandContext.challenge || 'N/A'}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 You are now in advisory chat mode. The audit is done. Answer the founder's follow-up questions with depth and specificity. Keep responses focused, personal, and actionable. No generic advice.` : '';
 
-    // Build conversation history for REST API
-    const contents = history
+    // Build conversation history (OpenAI format for Groq)
+    const messages = history
       .slice(-10)
-      .map(msg => ({ role: msg.role, parts: [{ text: msg.content }] }));
-    contents.push({ role: 'user', parts: [{ text: message }] });
+      .map(msg => ({ role: msg.role, content: msg.content }));
+    messages.push({ role: 'user', content: message });
 
-    // Direct REST call with full conversation history
-    const chatBody = {
-      system_instruction: { parts: [{ text: Prespecta_SYSTEM_PROMPT + brandContextBlock }] },
-      contents,
-      generationConfig: { temperature: 0.9, maxOutputTokens: 4096 }
-    };
-    const chatRes = await fetch(`${GEMINI_URL}?key=${GEMINI_KEY}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(chatBody),
-      signal: AbortSignal.timeout(60000)
-    });
-    const chatData = await chatRes.json();
-    if (!chatRes.ok) throw new Error(chatData?.error?.message || `HTTP ${chatRes.status}`);
-    const reply = chatData.candidates?.[0]?.content?.parts?.[0]?.text || '';
-
+    const reply = await callAIChat(Prespecta_SYSTEM_PROMPT + brandContextBlock, messages);
     res.json({ success: true, reply });
+
 
   } catch (err) {
     console.error('❌ /api/chat error:', err.message);
@@ -497,7 +500,7 @@ ${auditSummary ? `KEY AUDIT INSIGHT:\n${auditSummary}` : ''}
 ━━━━━━━━━━━━━━━━━━━━━━━━
 Now generate the complete content strategy. Make every single piece of content feel like it was written by someone who has studied this brand for months. Reference their actual words, their specific challenge, their exact archetype. This brand deserves content that no other brand could post. Deliver that.`;
 
-    const contentText = await callGemini(CONTENT_SYSTEM_PROMPT, [{ text: contentPrompt }]);
+    const contentText = await callAI(CONTENT_SYSTEM_PROMPT, contentPrompt);
     res.json({ success: true, content: contentText });
 
   } catch (err) {
@@ -512,8 +515,9 @@ Now generate the complete content strategy. Make every single piece of content f
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'online',
-    apiKeySet: !!process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'your_gemini_api_key_here',
+    apiKeySet: !!process.env.GROQ_API_KEY,
     timestamp: new Date().toISOString()
+
   });
 });
 
