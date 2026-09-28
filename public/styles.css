@@ -1360,3 +1360,15 @@ a { text-decoration: none; color: inherit; }
 .content-actions { display: flex; gap: 1rem; justify-content: center; margin-top: 2rem; flex-wrap: wrap; }
 .btn-ghost { padding: 0.75rem 1.5rem; border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; background: transparent; color: var(--text-muted); cursor: pointer; font-size: 0.95rem; transition: all 0.2s; }
 .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+/* Content Strategy quick action highlight */
+.qa-btn-highlight {
+  background: linear-gradient(135deg, rgba(167,139,250,0.2), rgba(236,72,153,0.15)) !important;
+  border: 1px solid rgba(167,139,250,0.4) !important;
+  color: #c4b5fd !important;
+  font-weight: 600 !important;
+}
+.qa-btn-highlight:hover {
+  background: linear-gradient(135deg, rgba(167,139,250,0.35), rgba(236,72,153,0.25)) !important;
+  border-color: rgba(167,139,250,0.6) !important;
+}

@@ -733,5 +733,36 @@ $('generateContentBtn')?.addEventListener('click', async () => {
 $('backToAnalysisBtn')?.addEventListener('click', () => showSection('analysis'));
 $('contentToChatBtn')?.addEventListener('click', () => showSection('chat'));
 
+// Content Strategy from inside chat sidebar
+$('contentStrategyBtn')?.addEventListener('click', async () => {
+  showSection('content');
+  $('contentLoading').style.display = 'flex';
+  $('contentOutput').style.display = 'none';
+  startContentLoadSteps();
+
+  try {
+    const res = await fetch('/api/content-strategy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ brandContext: state.brandContext, scores: state.scores, auditSummary: '' })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Content generation failed');
+    const parsed = parseContentSections(data.content);
+    renderContentTabs(parsed);
+    $('contentLoading').style.display = 'none';
+    $('contentOutput').style.display = 'block';
+    document.querySelectorAll('.content-tab').forEach((t,i) => t.classList.toggle('active', i===0));
+    document.querySelectorAll('.content-panel').forEach((p,i) => p.style.display = i===0 ? 'block' : 'none');
+  } catch (err) {
+    $('contentLoading').style.display = 'none';
+    showErrorBanner(err.message || 'Content generation failed.');
+    showSection('chat');
+  } finally {
+    stopContentLoadSteps();
+  }
+});
+
+
 console.log('%c🧠 Prespecta', 'font-size:18px;font-weight:bold;color:#a78bfa;');
 console.log('%cEmotionally intelligent brand advisor — ready.', 'color:#64748b;');

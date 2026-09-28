@@ -54,8 +54,8 @@ console.log('🌍 NODE_ENV:', process.env.NODE_ENV || 'not set');
 console.log('🔌 PORT:', process.env.PORT || '3000 (default)');
 
 // ─── Core AI caller using Groq (OpenAI-compatible, 6000 RPM free) ─────────
-async function callAI(systemPrompt, userContent, hasImages = false) {
-  const model = hasImages ? GROQ_VISION_MODEL : GROQ_MODEL;
+async function callAI(systemPrompt, userContent, temperature) {
+  const model = GROQ_MODEL;
 
   const messages = [
     { role: 'system', content: systemPrompt },
@@ -71,7 +71,7 @@ async function callAI(systemPrompt, userContent, hasImages = false) {
     body: JSON.stringify({
       model,
       messages,
-      temperature: 0.9,
+      temperature: temperature ?? 0.9,
       max_tokens: 8192
     }),
     signal: AbortSignal.timeout(120000)
@@ -276,9 +276,10 @@ Return ONLY this exact JSON structure:
 
     // Run audit and scoring in parallel using Groq (text-only, string content)
     const [auditText, scoreText] = await Promise.all([
-      callAI(Prespecta_SYSTEM_PROMPT, auditPrompt),
-      callAI('You are a brand scoring engine. Return only raw JSON, no markdown.', scorePrompt)
+      callAI(Prespecta_SYSTEM_PROMPT, auditPrompt, 0.9),
+      callAI('You are a brand scoring engine. Return only raw JSON, no markdown.', scorePrompt, 0)
     ]);
+
 
 
 
