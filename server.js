@@ -249,64 +249,83 @@ Deliver the full three-section brand audit. Be honest. Be specific. This founder
       });
     }
 
-    // Score prompt
-    const scorePrompt = `You are a brand diagnostics engine. Score this brand HONESTLY and return a raw JSON object only — no markdown, no explanation, no code fences.
+    // ── Deterministic scoring from actual brand data (no AI = always consistent) ──
+    const followers   = parseInt(brand.followers) || 0;
+    const avgLikes    = parseInt(brand.avgLikes)  || 0;
+    const avgComments = parseInt(brand.avgComments) || 0;
 
-Brand: ${brand.name}
-Industry: ${brand.industry}
-Target Audience: ${brand.targetAudience}
-Followers: ${brand.followers || 'unknown'}
-Avg Likes: ${brand.avgLikes || 'unknown'}
-Avg Comments: ${brand.avgComments || 'unknown'}
-Bio: ${brand.bio || 'not provided'}
-Sample Captions: ${brand.captions || 'not provided'}
-Challenge: ${brand.challenge || 'not provided'}
+    // Audience score → follower count brackets
+    const audienceScore = followers >= 100000 ? 82
+      : followers >= 50000  ? 74
+      : followers >= 10000  ? 65
+      : followers >= 5000   ? 57
+      : followers >= 1000   ? 47
+      : followers >= 500    ? 38
+      : followers >= 100    ? 29 : 20;
 
-Return ONLY this exact JSON structure:
-{
-  "overallScore": <integer 0-100>,
-  "contentScore": <integer 0-100>,
-  "audienceScore": <integer 0-100>,
-  "positioningScore": <integer 0-100>,
-  "messagingScore": <integer 0-100>,
-  "detectedArchetype": "<one of the 12 Jungian archetypes>",
-  "archetypeDescription": "<one vivid sentence about the current archetype energy — honest>",
-  "emotionalTone": "<2-4 word description of current brand tone>"
-}`;
+    // Content score → engagement rate
+    const engRate = followers > 0 ? ((avgLikes + avgComments) / followers) * 100 : 0;
+    const contentScore = engRate >= 10 ? 88
+      : engRate >= 6  ? 76
+      : engRate >= 3  ? 63
+      : engRate >= 1.5 ? 51
+      : engRate >= 0.5 ? 38 : 25;
 
-    // Run audit and scoring in parallel using Groq (text-only, string content)
-    const [auditText, scoreText] = await Promise.all([
-      callAI(Prespecta_SYSTEM_PROMPT, auditPrompt, 0.9),
-      callAI('You are a brand scoring engine. Return only raw JSON, no markdown.', scorePrompt, 0)
-    ]);
+    // Messaging score → content completeness
+    let messagingScore = 25;
+    if (brand.bio      && brand.bio.length      > 20) messagingScore += 18;
+    if (brand.captions && brand.captions.length > 20) messagingScore += 18;
+    if (brand.brandStory && brand.brandStory.length > 20) messagingScore += 12;
+    messagingScore = Math.min(messagingScore, 78);
 
+    // Positioning score → how defined the brand is
+    let positioningScore = 20;
+    if (brand.industry && brand.industry !== 'Other') positioningScore += 18;
+    if (brand.targetAudience && brand.targetAudience.length > 5) positioningScore += 18;
+    if (brand.archetype) positioningScore += 12;
+    if (brand.challenge && brand.challenge.length > 10) positioningScore += 8;
+    positioningScore = Math.min(positioningScore, 78);
 
+    // Overall = weighted average
+    const overallScore = Math.round(
+      audienceScore * 0.30 + contentScore * 0.30 +
+      messagingScore * 0.20 + positioningScore * 0.20
+    );
 
+    // Archetype from user selection, emotional tone from archetype map
+    const archetypeMap = {
+      'Hero': ['Bold & Empowering', 'A warrior brand built to inspire triumph.'],
+      'Sage': ['Wise & Authoritative', 'A knowledge brand that earns trust through depth.'],
+      'Creator': ['Imaginative & Expressive', 'A visionary brand that turns ideas into beauty.'],
+      'Ruler': ['Commanding & Prestigious', 'A power brand built on excellence and control.'],
+      'Innocent': ['Pure & Optimistic', 'A brand radiating simplicity and honest goodness.'],
+      'Explorer': ['Free & Adventurous', 'A discovery brand that pushes beyond the obvious.'],
+      'Rebel': ['Disruptive & Fierce', 'A challenger brand that breaks every rule.'],
+      'Magician': ['Transformative & Mystical', 'A brand that turns the ordinary into the extraordinary.'],
+      'Lover': ['Intimate & Magnetic', 'A desire brand built on deep emotional connection.'],
+      'Caregiver': ['Nurturing & Warm', 'A service brand that puts people before profit.'],
+      'Jester': ['Playful & Irreverent', 'A brand that makes people laugh and feel alive.'],
+      'Everyman': ['Grounded & Relatable', 'A brand for everyone — real, honest, belonging.']
+    };
+    const archKey = brand.archetype || 'Creator';
+    const [emotionalTone, archetypeDescription] = archetypeMap[archKey] || archetypeMap['Creator'];
 
-    // Parse scores safely
-    let scores = {
-      overallScore: 55, contentScore: 60, audienceScore: 50,
-      positioningScore: 52, messagingScore: 58,
-      detectedArchetype: 'Creator',
-      archetypeDescription: 'Building something real but not yet showing the full picture.',
-      emotionalTone: 'Ambitious but unclear'
+    const scores = {
+      overallScore, contentScore: Math.round(contentScore),
+      audienceScore: Math.round(audienceScore),
+      positioningScore: Math.round(positioningScore),
+      messagingScore: Math.round(messagingScore),
+      detectedArchetype: archKey,
+      archetypeDescription,
+      emotionalTone
     };
 
-    try {
-      const rawScore = scoreText.replace(/```json\n?|\n?```/gi, '').trim();
-      const parsed = JSON.parse(rawScore);
-      scores = { ...scores, ...parsed };
+    // Only run the audit (scoring is now formula-based, no 2nd AI call needed)
+    const auditText = await callAI(Prespecta_SYSTEM_PROMPT, auditPrompt, 0.9);
 
-    } catch (parseErr) {
-      console.warn('Score parse failed, using defaults:', parseErr.message);
-    }
+    res.json({ success: true, analysis: auditText, scores, brandContext: brand });
 
-    res.json({
-      success: true,
-      analysis: auditText,
-      scores,
-      brandContext: brand
-    });
+
 
 
   } catch (err) {
