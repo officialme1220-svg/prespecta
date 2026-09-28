@@ -3,21 +3,22 @@
    Multi-step SPA · Drag-drop uploads · AI analysis · Chat advisor
    ═══════════════════════════════════════════════════════════════════════ */
 
-// ── Jungian Archetype Data ───────────────────────────────────────────────
+// ── Archetype Data — simple feeling-based language ───────────────────────
 const ARCHETYPES = [
-  { id: 'Hero',      emoji: '⚔️',  desc: 'Triumph & Courage',       brands: 'Nike, Red Bull' },
-  { id: 'Sage',      emoji: '🦉',  desc: 'Wisdom & Truth',           brands: 'Google, TED' },
-  { id: 'Creator',   emoji: '🎨',  desc: 'Imagination & Craft',      brands: 'Adobe, Lego' },
-  { id: 'Ruler',     emoji: '👑',  desc: 'Control & Prestige',       brands: 'Mercedes, Rolex' },
-  { id: 'Innocent',  emoji: '🌸',  desc: 'Simplicity & Goodness',    brands: 'Dove, Airbnb' },
-  { id: 'Explorer',  emoji: '🧭',  desc: 'Freedom & Discovery',      brands: 'Patagonia, Jeep' },
-  { id: 'Rebel',     emoji: '🔥',  desc: 'Disruption & Defiance',    brands: 'Harley-Davidson' },
-  { id: 'Magician',  emoji: '✨',  desc: 'Transformation & Wonder',  brands: 'Apple, Disney' },
-  { id: 'Lover',     emoji: '💖',  desc: 'Intimacy & Desire',        brands: 'Chanel, Tiffany' },
-  { id: 'Caregiver', emoji: '🤝',  desc: 'Nurturing & Service',      brands: 'TOMS, Dove' },
-  { id: 'Jester',    emoji: '🃏',  desc: 'Fun & Irreverence',        brands: 'Old Spice' },
-  { id: 'Everyman',  emoji: '🌍',  desc: 'Belonging & Ground',       brands: 'IKEA, Target' },
+  { id: 'Caregiver', emoji: '🤝',  label: 'Warm & Cared For',       desc: 'Customers feel nurtured, safe, looked after' },
+  { id: 'Creator',   emoji: '🎨',  label: 'Inspired & Creative',    desc: 'Customers feel sparked, imaginative, crafted for' },
+  { id: 'Everyman',  emoji: '🌍',  label: 'At Home & Belonging',    desc: 'Customers feel like they fit right in' },
+  { id: 'Magician',  emoji: '✨',  label: 'Amazed & Transformed',   desc: 'Customers feel like something magical just happened' },
+  { id: 'Hero',      emoji: '⚡',  label: 'Empowered & Motivated',  desc: 'Customers feel unstoppable, pushed to be better' },
+  { id: 'Innocent',  emoji: '🌸',  label: 'Happy & Carefree',       desc: 'Customers feel pure joy, simplicity, peace' },
+  { id: 'Sage',      emoji: '🦉',  label: 'Smart & Informed',       desc: 'Customers feel educated, enlightened, wiser' },
+  { id: 'Explorer',  emoji: '🧭',  label: 'Free & Adventurous',     desc: 'Customers feel excited, discovering something new' },
+  { id: 'Lover',     emoji: '💖',  label: 'Special & Desired',      desc: 'Customers feel deeply connected, seen, adored' },
+  { id: 'Ruler',     emoji: '👑',  label: 'Premium & Prestigious',  desc: 'Customers feel elite, like they chose the best' },
+  { id: 'Rebel',     emoji: '🔥',  label: 'Bold & Different',       desc: 'Customers feel edgy, unconventional, fearless' },
+  { id: 'Jester',    emoji: '😄',  label: 'Fun & Entertained',      desc: 'Customers feel joy, laughter, lightness' },
 ];
+
 
 // ── App State ────────────────────────────────────────────────────────────
 const state = {
@@ -175,12 +176,13 @@ function buildArchetypeGrid() {
   const grid = $('archetypeGrid');
   if (!grid) return;
   grid.innerHTML = ARCHETYPES.map(a => `
-    <div class="archetype-card" data-id="${a.id}" role="button" tabindex="0" aria-label="${a.id} archetype">
+    <div class="archetype-card" data-id="${a.id}" role="button" tabindex="0" aria-label="${a.label}">
       <div class="ac-emoji">${a.emoji}</div>
-      <div class="ac-name">${a.id}</div>
+      <div class="ac-name">${a.label}</div>
       <div class="ac-desc">${a.desc}</div>
     </div>
   `).join('');
+
 
   grid.querySelectorAll('.archetype-card').forEach(card => {
     const select = () => {
